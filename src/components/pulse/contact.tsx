@@ -1,5 +1,8 @@
 import { useState } from "react";
+import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { submitDemoRequest } from "@/lib/demo-request.functions";
+
 
 const schema = z.object({
   name: z.string().trim().min(2, "Please share your name").max(100),
@@ -16,16 +19,19 @@ type Errors = Partial<Record<keyof FormState, string>>;
 const STAGES = ["Pre-launch", "Active campaign", "Last 90 days", "Post-election / governance"];
 
 export function ContactSection() {
+  const submit = useServerFn(submitDemoRequest);
   const [data, setData] = useState<FormState>({
     name: "", email: "", organization: "", role: "", stage: "", message: "",
   });
   const [errors, setErrors] = useState<Errors>({});
   const [submitting, setSubmitting] = useState(false);
   const [done, setDone] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const update = <K extends keyof FormState>(k: K, v: FormState[K]) => {
     setData((d) => ({ ...d, [k]: v }));
     if (errors[k]) setErrors((e) => ({ ...e, [k]: undefined }));
+    if (submitError) setSubmitError(null);
   };
 
   const onSubmit = async (e: React.FormEvent) => {
@@ -41,10 +47,18 @@ export function ContactSection() {
       return;
     }
     setSubmitting(true);
-    await new Promise((r) => setTimeout(r, 700));
-    setSubmitting(false);
-    setDone(true);
+    setSubmitError(null);
+    try {
+      await submit({ data: result.data });
+      setDone(true);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Something went wrong. Please try again.";
+      setSubmitError(msg);
+    } finally {
+      setSubmitting(false);
+    }
   };
+
 
   return (
     <section id="contact" className="relative py-32 md:py-44 border-t border-hairline bg-canvas-warm/40">
