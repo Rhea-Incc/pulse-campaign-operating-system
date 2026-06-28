@@ -129,6 +129,13 @@ export function ContactSection() {
                     <div className="mt-1 text-right text-[10px] font-mono text-graphite">{data.message.length}/1000</div>
                   </Field>
 
+                  {submitError && (
+                    <div role="alert" className="flex items-start gap-3 rounded-md border border-destructive/30 bg-destructive/5 px-3 py-2.5 text-[12px] text-destructive">
+                      <svg viewBox="0 0 24 24" className="h-4 w-4 mt-0.5 shrink-0" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01" strokeLinecap="round"/></svg>
+                      <span>{submitError}</span>
+                    </div>
+                  )}
+
                   <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
                     <p className="text-[11px] text-graphite max-w-sm">By submitting you agree to be contacted by the Pulse team. We don't share your details.</p>
                     <button
